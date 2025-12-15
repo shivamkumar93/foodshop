@@ -4,14 +4,15 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
 
-class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only = True, validators = [validate_password])
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
+# class UserRegisterSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only = True, validators = [validate_password])
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'password']
     
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+#     def create(self, validated_data):
+        
+#         return User.objects.create_user(**validated_data)
              
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
