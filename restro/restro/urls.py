@@ -15,9 +15,9 @@ router.register(r"recipe", RecipeViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
-    path('login/', obtain_auth_token),
+    #path('login/', obtain_auth_token),
     path('register/', RegisterAPI.as_view()),
     path('verify/', VerifyOtp.as_view()),
-    
+    path('login/', LoginAPIView.as_view())
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

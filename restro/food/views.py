@@ -11,30 +11,8 @@ import dns.resolver
 import random
 from django.core.mail import send_mail
 from rest_framework import status
-
-
-# class SingupViewSet(viewsets.ViewSet):
-#     @action(detail=False, methods=['post'])
-#     def register(self, request):
-#         username = request.data.get('username')
-#         email = request.data.get('email')
-#         password = request.data.get('password')
-
-#         if not email or not password:
-#             return Response({"error":"Please enter email"}, status=400)
-#         try:
-#             validate_email(email)
-#         except:
-#             return Response({'error':'not valid email'})
-        
-#         domain = email.split('@')[1]
-#         try:
-#             dns.resolver.resolve(domain,'MX')
-#         except:
-#             return Response({"error":"please enter valid email"}, status=400)
-        
-#         User.objects.create_user(username=username, email=email, password=password)
-#         return Response({"message":"user created successfully"},status=200 )
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 
 class RegisterAPI(APIView):
 
@@ -47,6 +25,7 @@ class RegisterAPI(APIView):
             
             otp = random.randint(100000, 999999)
             user.otp = otp
+            
             user.save()
 
     # send otp on email
@@ -81,6 +60,32 @@ class VerifyOtp(APIView):
     
         return Response({'message':'otp verified successfully'})
 
+
+class LoginAPIView(APIView):
+    def post(self, request):
+
+        email = request.data.get('email')
+        password = request.data.get('password')
+        print(email)
+        print(password)
+
+        if not email or not password :
+            
+            return Response({'error':" email or password required"}, status=400)
+        
+      
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'error':'user is not available'},status=400)
+        
+        if not user.check_password(password):
+            return Response({'error':'email or password invalid'},status=400)
+        
+        token, create = Token.objects.get_or_create(user=user)
+
+        return Response({'message':'token created successfully', 'token':token.key, 'email':user.email})
+        
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
