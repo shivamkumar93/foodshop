@@ -52,7 +52,7 @@ class RegisterAPI(APIView):
     # send otp on email
             send_mail(
                 subject="email verification otp",
-                message="your otp {otp}",
+                message=f"your otp {otp}",
                 from_email="bcashivam11@gmail.com",
                 recipient_list=[user.email],
                 fail_silently=False
@@ -70,12 +70,15 @@ class VerifyOtp(APIView):
             return Response({'message':'Please enter valid email or otp'}, status=400)
         
         try:
-            verify_otp = User.objects.filter(email=email, otp=otp, is_varified = False).latest
+            verify_otp = User.objects.filter(email=email, otp=otp).last()
         except:
             return Response({'message':'invalid otp'})
         
-        verify_otp.is_verified = True
-        verify_otp.save()
+        if verify_otp.is_varified == False:
+
+            verify_otp.is_varified = True
+            verify_otp.save()
+    
         return Response({'message':'otp verified successfully'})
 
 
