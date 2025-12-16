@@ -117,3 +117,13 @@ STATIC_URL = 'static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR/'media/'
+
+AUTH_USER_MODEL = 'food.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bcashivam11@gmail.com'       # Replace with your email
+EMAIL_HOST_PASSWORD = 'mflyfceuelvjgnam'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

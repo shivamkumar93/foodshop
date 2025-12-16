@@ -8,14 +8,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
-router.register(r"singup", SingupViewSet, basename='singup')
+
 router.register(r"category", CategoryViewSet)
 router.register(r"recipe", RecipeViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
-    path('login/', obtain_auth_token)
+    path('login/', obtain_auth_token),
+    path('register/', RegisterAPI.as_view()),
+    path('verify/', VerifyOtp.as_view()),
     
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
