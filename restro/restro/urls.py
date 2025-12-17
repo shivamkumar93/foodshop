@@ -1,11 +1,27 @@
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework import routers
 from food.views import *
 from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="My API",
+        default_version='v1',
+        description="API documentation",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="support@example.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
 
 router = routers.DefaultRouter()
 
@@ -18,6 +34,7 @@ urlpatterns = [
     #path('login/', obtain_auth_token),
     path('register/', RegisterAPI.as_view()),
     path('verify/', VerifyOtp.as_view()),
-    path('login/', LoginAPIView.as_view())
+    path('login/', LoginAPIView.as_view()),
+    path('swagger/',schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
