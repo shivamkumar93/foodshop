@@ -13,6 +13,9 @@ from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.conf import settings
 
 class RegisterAPI(APIView):
 
@@ -61,8 +64,9 @@ class VerifyOtp(APIView):
         return Response({'message':'otp verified successfully'})
 
 
-class LoginAPIView(APIView):
-    def post(self, request):
+class LoginAPIView(viewsets.ViewSet):
+    @action(detail=False, methods=['post'])
+    def login(self, request):
 
         email = request.data.get('email')
         password = request.data.get('password')
@@ -80,6 +84,32 @@ class LoginAPIView(APIView):
         token, create = Token.objects.get_or_create(user=user)
 
         return Response({'message':'token created successfully', 'token':token.key, 'email':user.email})
+    
+    @action(detail=False, methods=['post'])
+    def google_login(self, request):
+
+        google_token = request.data.get('id_token')
+
+        if not google_token:
+            return Response({'error':'google token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            idinfo = id_token.verify_oauth2_token(google_token, requests.Request(), settings.GOOGLE_CLIENT_ID)
+            email = idinfo['email']
+            user, create = User.objects.get_or_create(email=email)
+
+            token, create = Token.objects.get_or_create(user=user)
+            return Response({'message':'user, token create successfully by google',
+                             "token":token.key,
+                             "email":user.email,
+                             "login_type":"google"
+                             })
+        except ValueError:
+            return Response({'error':'invalid google token'}, status=status.HTTP_400_BAD_REQUEST)
+            
+
+    
+
         
 class ForgotPasswordView(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
@@ -128,11 +158,6 @@ class ForgotPasswordView(viewsets.ViewSet):
         user.otp = None
         user.save()
         return Response({'message':'your password is change successfully.'})
-
-
-
-
-
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

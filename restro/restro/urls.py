@@ -28,6 +28,7 @@ router = routers.DefaultRouter()
 router.register(r"category", CategoryViewSet, basename='category')
 router.register(r"recipe", RecipeViewSet, basename='recipe')
 router.register(r"forgotPassword", ForgotPasswordView, basename='forgot')
+router.register(r"authlogin",LoginAPIView, basename='login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,7 +37,7 @@ urlpatterns = [
     #path('login/', obtain_auth_token),
     path('register/', RegisterAPI.as_view()),
     path('verify/', VerifyOtp.as_view()),
-    path('login/', LoginAPIView.as_view()),
+    
     
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
