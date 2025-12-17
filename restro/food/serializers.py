@@ -29,8 +29,9 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class RecipeSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
     class Meta:
         model = Recipe
-        fields = "__all__"
+        fields = ['id','title','image','price','is_veg','category']
     
     
