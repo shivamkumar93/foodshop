@@ -25,16 +25,18 @@ schema_view = get_schema_view(
 
 router = routers.DefaultRouter()
 
-router.register(r"category", CategoryViewSet)
-router.register(r"recipe", RecipeViewSet)
+router.register(r"category", CategoryViewSet, basename='category')
+router.register(r"recipe", RecipeViewSet, basename='recipe')
+router.register(r"forgotPassword", ForgotPasswordView, basename='forgot')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path('swagger/',schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
     #path('login/', obtain_auth_token),
     path('register/', RegisterAPI.as_view()),
     path('verify/', VerifyOtp.as_view()),
     path('login/', LoginAPIView.as_view()),
-    path('swagger/',schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),
+    
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

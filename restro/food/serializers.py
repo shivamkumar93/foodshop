@@ -18,7 +18,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
+# class ForgotPassword(serializers.Serializer):
+#     email = serializers.EmailField()
+#     class Meta:
+#         fields = ['email']
                 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

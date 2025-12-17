@@ -20,7 +20,7 @@ class RegisterAPI(APIView):
         
         data = request.data
         serializer = UserRegisterSerializer(data=data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             user = serializer.save(is_varified=False)
             
             otp = random.randint(100000, 999999)
@@ -66,14 +66,9 @@ class LoginAPIView(APIView):
 
         email = request.data.get('email')
         password = request.data.get('password')
-        print(email)
-        print(password)
-
         if not email or not password :
-            
             return Response({'error':" email or password required"}, status=400)
         
-      
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -86,6 +81,59 @@ class LoginAPIView(APIView):
 
         return Response({'message':'token created successfully', 'token':token.key, 'email':user.email})
         
+class ForgotPasswordView(viewsets.ViewSet):
+    @action(detail=False, methods=['post'])
+    def reset_otp(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error':'email required'}, status=400)
+        
+        try:
+            user = User.objects.filter(email=email).first()
+        except User.DoesNotExist:
+            return Response({'error':'email invalid'}, status=400)
+        
+        otp = random.randint(100000, 999999)
+
+        user.otp = otp
+        user.save()
+        
+        send_mail(
+            subject="forgot password",
+            message=f"new otp {otp}",
+            from_email="bcashivam11@gmail.com",
+            recipient_list=[user.email],
+            fail_silently=False
+
+        )
+        return Response({'message':'sent forgot password otp'}, status=201)
+    @action(detail=False, methods=['post'])
+    def reset_password(self , request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        new_password = request.data.get('new_password')
+
+        if not email or not otp or not new_password:
+            return Response({'error':'invalid email otp and new_password'})
+        
+        try:
+            user = User.objects.filter(email=email).first()
+        except User.DoesNotExist:
+            return Response({'error':'invalid email'}, status=400)
+        
+        if user.otp != otp:
+            return Response({'message':'invalid otp'}, status=400)
+        
+        user.set_password(new_password)
+        user.otp = None
+        user.save()
+        return Response({'message':'your password is change successfully.'})
+
+
+
+
+
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
