@@ -6,6 +6,8 @@ from .manager import *
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=200, null=True, blank=True)
+    last_name = models.CharField(max_length=150, null=True, blank=True)
     is_varified = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
 
@@ -47,7 +49,7 @@ class Order(models.Model):
         return total
     
     def __str__(self):
-        return f"{self.user.email}"
+        return f"{self.user.first_name}"
     
 class OrderItems(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
