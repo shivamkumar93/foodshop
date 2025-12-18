@@ -16,6 +16,7 @@ from django.contrib.auth import authenticate
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 
 class RegisterAPI(APIView):
 
@@ -101,6 +102,9 @@ class LoginAPIView(viewsets.ViewSet):
         
         email = idinfo['email']
         user, create = User.objects.get_or_create(email=email)
+        if user.is_varified == False:
+            user.is_varified = True
+            user.save()
 
         token, create = Token.objects.get_or_create(user=user)
         return Response({'message':'user create successfully ',
@@ -109,8 +113,6 @@ class LoginAPIView(viewsets.ViewSet):
                         "login_type":"google"
                         })
             
-
-    
 
         
 class ForgotPasswordView(viewsets.ViewSet):
@@ -165,17 +167,19 @@ class ForgotPasswordView(viewsets.ViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+   
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category', 'title']
 
 class OrderViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
     def create_order(self, request):
 
         data = request.data
-
         if isinstance(data,dict):
             data = [data]
 
@@ -194,6 +198,6 @@ class OrderViewSet(viewsets.ViewSet):
             OrderItems.objects.create(order=order, recipe=recipe, quantity = item['quantity'])
 
         items = [items]
-        return Response({'message':'order create successfully', 'order_id':order.id,'total_price':order.get_total_price(),'recipe':items }, status=status.HTTP_201_CREATED)
+        return Response({'message':'order create successfully', 'order_id':order.id,'name':order.user.first_name,'total_price':order.get_total_price(),'recipe':items }, status=status.HTTP_201_CREATED)
 
     
