@@ -35,9 +35,17 @@ class Recipe(models.Model):
         return self.title
 
 class Order(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    quantity = models.BooleanField(default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     def __str__(self):
-        return f"{self.recipe} - {self.quantity}"
+        return f"{self.user.email}"
+    
+class OrderItems(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+  
+    def __str__(self):
+        return f"{self.recipe.price} x {self.quantity} -- {self.recipe.title}"

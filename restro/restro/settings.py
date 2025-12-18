@@ -135,3 +135,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bcashivam11@gmail.com'      
 EMAIL_HOST_PASSWORD = 'mflyfceuelvjgnam'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# add google client id
+
+GOOGLE_CLIENT_ID = "784349985002-ursdrgk7k1o33i4b0mgfe7r5rv6po2db.apps.googleusercontent.com"

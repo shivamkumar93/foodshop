@@ -33,5 +33,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['id','title','image','price','is_veg','category']
+
+class OrderItemSerializer(serializers.Serializer):
+    recipe_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value = 1)
     
     

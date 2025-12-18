@@ -95,17 +95,19 @@ class LoginAPIView(viewsets.ViewSet):
         
         try:
             idinfo = id_token.verify_oauth2_token(google_token, requests.Request(), settings.GOOGLE_CLIENT_ID)
-            email = idinfo['email']
-            user, create = User.objects.get_or_create(email=email)
-
-            token, create = Token.objects.get_or_create(user=user)
-            return Response({'message':'user, token create successfully by google',
-                             "token":token.key,
-                             "email":user.email,
-                             "login_type":"google"
-                             })
+           
         except ValueError:
             return Response({'error':'invalid google token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = idinfo['email']
+        user, create = User.objects.get_or_create(email=email)
+
+        token, create = Token.objects.get_or_create(user=user)
+        return Response({'message':'user create successfully ',
+                        "token":token.key,
+                        "email":user.email,
+                        "login_type":"google"
+                        })
             
 
     
@@ -167,5 +169,31 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
+class OrderViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=['post'])
+    def create_order(self, request):
+
+        data = request.data
+
+        if isinstance(data,dict):
+            data = [data]
+
+        serializer = OrderItemSerializer(data=data, many=True)
+        serializer.is_valid(raise_exception=True)
+        items = serializer.validated_data
+        
+    
+        if  len(items) == 0:
+            return Response({'error':'recipe_id or quantity is required'}, status=status.HTTP_400_BAD_REQUEST)
+        # order create
+        order = Order.objects.create(user=request.user)
+
+        # orderitmes create
+        for item in items:
+            recipe = Recipe.objects.get(id=item['recipe_id'])
+            OrderItems.objects.create(order=order, recipe=recipe, quantity = item['quantity'])
+
+            return Response({'message':'order create successfully', 'order_id':order.id, 'recipe':recipe.title}, status=status.HTTP_201_CREATED)
 
     

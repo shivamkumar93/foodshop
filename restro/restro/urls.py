@@ -29,6 +29,7 @@ router.register(r"category", CategoryViewSet, basename='category')
 router.register(r"recipe", RecipeViewSet, basename='recipe')
 router.register(r"forgotPassword", ForgotPasswordView, basename='forgot')
 router.register(r"authlogin",LoginAPIView, basename='login')
+router.register(r"order", OrderViewSet, basename='order')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
