@@ -118,7 +118,7 @@ class ForgotPasswordView(viewsets.ViewSet):
     def reset_otp(self, request):
         email = request.data.get('email')
         if not email:
-            return Response({'error':'email required'}, status=400)
+            return Response({'error':'email required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             user = User.objects.filter(email=email).first()
@@ -183,17 +183,17 @@ class OrderViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         items = serializer.validated_data
         
-    
-        if  len(items) == 0:
+        if len(items) == 0:
             return Response({'error':'recipe_id or quantity is required'}, status=status.HTTP_400_BAD_REQUEST)
-        # order create
+        # order create---
         order = Order.objects.create(user=request.user)
 
-        # orderitmes create
+        # orderitmes create--
         for item in items:
             recipe = Recipe.objects.get(id=item['recipe_id'])
             OrderItems.objects.create(order=order, recipe=recipe, quantity = item['quantity'])
 
-            return Response({'message':'order create successfully', 'order_id':order.id, 'recipe':recipe.title}, status=status.HTTP_201_CREATED)
+        items = [items]
+        return Response({'message':'order create successfully', 'order_id':order.id,'total_price':order.get_total_price(),'recipe':items }, status=status.HTTP_201_CREATED)
 
     

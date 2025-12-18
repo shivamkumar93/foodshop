@@ -37,6 +37,14 @@ class Recipe(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_total_price(self):
+        total = 0
+        orderitems= OrderItems.objects.filter(order=self.id)
+        for item in orderitems:
+            item_price = item.total_price()
+            total +=item_price
+        return total
     
     def __str__(self):
         return f"{self.user.email}"
@@ -46,6 +54,8 @@ class OrderItems(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
-  
+    def total_price(self):
+        return self.recipe.price * self.quantity
+    
     def __str__(self):
         return f"{self.recipe.price} x {self.quantity} -- {self.recipe.title}"
