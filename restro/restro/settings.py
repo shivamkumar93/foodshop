@@ -140,3 +140,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # add google client id
 
 GOOGLE_CLIENT_ID = "784349985002-ursdrgk7k1o33i4b0mgfe7r5rv6po2db.apps.googleusercontent.com"
+
+RAZORPAY_KEY_ID = 'rzp_test_RJKzOMnn4i4LG0'
+RAZORPAY_KEY_SECRET = 'skDdejIqeeky1G0kAPw2wbE2'

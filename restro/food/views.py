@@ -17,6 +17,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
+import razorpay
+from django.conf import settings
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
 
 class RegisterAPI(APIView):
 
@@ -197,7 +202,22 @@ class OrderViewSet(viewsets.ViewSet):
             recipe = Recipe.objects.get(id=item['recipe_id'])
             OrderItems.objects.create(order=order, recipe=recipe, quantity = item['quantity'])
 
-        items = [items]
-        return Response({'message':'order create successfully', 'order_id':order.id,'name':order.user.first_name,'total_price':order.get_total_price(),'recipe':items }, status=status.HTTP_201_CREATED)
+        total_amount = order.get_total_price()
 
-    
+        razorpay_order = client.order.create({
+            "amount": int(total_amount * 100),
+            "currency": "INR",
+            "payment_capture": 1
+        })
+        Payment.objects.create(order=order, razorpay_order_id=razorpay_order['id'])
+
+        items = [items]
+        return Response({'message':'order create successfully',
+                        'order_id':order.id,
+                        'name':order.user.first_name,
+                        'total_price':order.get_total_price(),
+                        'razorpay_order_id':razorpay_order['id'],
+                        "razorpay_key": settings.RAZORPAY_KEY_ID,
+                        'recipe':items },
+                          status=status.HTTP_201_CREATED)
+

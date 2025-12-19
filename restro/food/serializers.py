@@ -38,4 +38,9 @@ class OrderItemSerializer(serializers.Serializer):
     recipe_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value = 1)
     
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = "__all__"
+        read_only_fields = ['status', 'razorpay_payment_id', 'razorpay_signature']
     
