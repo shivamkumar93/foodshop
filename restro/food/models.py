@@ -43,7 +43,7 @@ class Order(models.Model):
         ('canceled','canceled')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    statu = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def get_total_price(self):

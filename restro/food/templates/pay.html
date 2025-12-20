@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Food Shop Payment</title>
+    <!-- Razorpay Checkout script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<h2>Food Shop Order Payment</h2>
+
+<button id="pay-button">Pay Now</button>
+
+<script>
+    // Replace these with actual backend values
+    const BACKEND_ORDER_CREATE_URL = "/order/create_order/"; 
+    const BACKEND_PAYMENT_VERIFY_URL = "/paymentVerify/";
+    const USER_TOKEN = "Token 59858cdde9f8e64ecb38e920e7f1d8c70f5e3db7";  // If auth required
+
+    document.getElementById('pay-button').onclick = async function(e) {
+        e.preventDefault();
+
+        try {
+            // 1️⃣ Create order on backend
+            const orderResponse = await fetch(BACKEND_ORDER_CREATE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Token 59858cdde9f8e64ecb38e920e7f1d8c70f5e3db7 `
+                },
+                body: JSON.stringify([
+                    { "recipe_id": 1, "quantity": 2 }  // Example order data
+                ])
+            });
+
+            const orderData = await orderResponse.json();
+            const razorpayOrderId = orderData.razorpay_order_id;
+            const amount = orderData.total_price;
+
+            // 2️⃣ Open Razorpay Checkout
+            const options = {
+                "key": "rzp_test_RJKzOMnn4i4LG0",  // Backend or settings
+                "amount": amount * 100,      // Razorpay expects amount in paisa
+                "currency": "INR",
+                "name": "Food Shop",
+                "description": "Order Payment",
+                "order_id": razorpayOrderId,
+                "handler": async function(response){
+                    // 3️⃣ Payment successful → verify backend
+                    const verifyResponse = await fetch(BACKEND_PAYMENT_VERIFY_URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Token 59858cdde9f8e64ecb38e920e7f1d8c70f5e3db7`
+                        },
+                        body: JSON.stringify({
+                            "razorpay_order_id": response.razorpay_order_id,
+                            "razorpay_payment_id": response.razorpay_payment_id,
+                            "razorpay_signature": response.razorpay_signature
+                        })
+                    });
+
+                    const verifyData = await verifyResponse.json();
+                    alert(verifyData.message);  // "Payment verified successfully"
+                },
+                "theme": {
+                    "color": "#F37254"
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Something went wrong. Check console for details.");
+        }
+    };
+</script>
+
+</body>
+</html>

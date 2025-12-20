@@ -19,6 +19,7 @@ from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 import razorpay
 from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
@@ -181,6 +182,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_fields = ['category', 'title']
 
 class OrderViewSet(viewsets.ViewSet):
+    
     @action(detail=False, methods=['post'])
     def create_order(self, request):
 
@@ -211,7 +213,7 @@ class OrderViewSet(viewsets.ViewSet):
         })
         Payment.objects.create(order=order, razorpay_order_id=razorpay_order['id'])
 
-        items = [items]
+        
         return Response({'message':'order create successfully',
                         'order_id':order.id,
                         'name':order.user.first_name,
@@ -221,3 +223,29 @@ class OrderViewSet(viewsets.ViewSet):
                         'recipe':items },
                           status=status.HTTP_201_CREATED)
 
+class VerifyPaymentApiview(APIView):
+    
+    def post(self, request):
+        data = request.data
+
+        try:
+            payment = Payment.objects.get(razorpay_order_id=data['razorpay_order_id'])
+        except Payment.DoesNotExist:
+            return Response({'error':'razorpay_order_id required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        client.utility.verify_payment_signature({
+            "razorpay_order_id" :data['razorpay_order_id'],
+            "razorpay_payment_id":data['razorpay_payment_id'],
+            "razorpay_signature" :data['razorpay_signature']
+        })
+
+        payment.razorpay_payment_id = data['razorpay_payment_id']
+        payment.razorpay_signature = data['razorpay_signature']
+        payment.status = 'success'
+        payment.save()
+        payment.order.status = 'paid'
+        payment.order.save()
+        return Response({'message':'payment sumbit successfully'})
+    
+def verify(request):
+    return render(request, 'pay.html')

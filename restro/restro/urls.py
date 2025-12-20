@@ -38,7 +38,8 @@ urlpatterns = [
     #path('login/', obtain_auth_token),
     path('register/', RegisterAPI.as_view()),
     path('verify/', VerifyOtp.as_view()),
+    path('paymentVerify/', VerifyPaymentApiview.as_view()),
     
-    
+    path('payment/', verify),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
