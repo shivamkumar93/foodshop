@@ -196,8 +196,18 @@ class OrderViewSet(viewsets.ViewSet):
         
         if len(items) == 0:
             return Response({'error':'recipe_id or quantity is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # address
+        address_id = data[0].get('address_id')
+        if not address_id:
+            return Response({'error':'address_id is required'})
+        
+        try:
+            address = Address.objects.get(id = address_id, user= request.user)
+        except Address.DoesNotExist:
+            return Response({'error':'address invalid'}, status=status.HTTP_400_BAD_REQUEST)   
         # order create---
-        order = Order.objects.create(user=request.user)
+        order = Order.objects.create(user=request.user, address=address)
 
         # orderitmes create--
         for item in items:
@@ -217,6 +227,7 @@ class OrderViewSet(viewsets.ViewSet):
         return Response({'message':'order create successfully',
                         'order_id':order.id,
                         'name':order.user.first_name,
+                        'address':order.address,
                         'total_price':order.get_total_price(),
                         'razorpay_order_id':razorpay_order['id'],
                         "razorpay_key": settings.RAZORPAY_KEY_ID,
@@ -249,3 +260,7 @@ class VerifyPaymentApiview(APIView):
     
 def verify(request):
     return render(request, 'pay.html')
+
+class AddressView(viewsets.ModelViewSet):
+    queryset = Address.objects.all()
+    serializer_class = AddressSerializer

@@ -43,6 +43,7 @@ class Order(models.Model):
         ('canceled','canceled')
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    address = models.ForeignKey('Address', on_delete=models.SET_NULL, blank=True, null=True)
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -84,3 +85,15 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"payment for order {self.order.id}"
+    
+class Address(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=150)
+    pincode = models.CharField(max_length=10, null=True, blank=True)
+    phone = models.CharField(max_length=15)
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name 
