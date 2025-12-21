@@ -205,10 +205,11 @@ class OrderViewSet(viewsets.ViewSet):
         try:
             address = Address.objects.get(id = address_id, user= request.user)
         except Address.DoesNotExist:
-            return Response({'error':'address invalid'}, status=status.HTTP_400_BAD_REQUEST)   
+            return Response({'error':'address invalid'}, status=status.HTTP_400_BAD_REQUEST) 
         # order create---
         order = Order.objects.create(user=request.user, address=address)
-
+        address_data = AddressSerializer(order.address).data
+        
         # orderitmes create--
         for item in items:
             recipe = Recipe.objects.get(id=item['recipe_id'])
@@ -227,7 +228,7 @@ class OrderViewSet(viewsets.ViewSet):
         return Response({'message':'order create successfully',
                         'order_id':order.id,
                         'name':order.user.first_name,
-                        'address':order.address,
+                        'address':address_data,
                         'total_price':order.get_total_price(),
                         'razorpay_order_id':razorpay_order['id'],
                         "razorpay_key": settings.RAZORPAY_KEY_ID,
@@ -264,3 +265,9 @@ def verify(request):
 class AddressView(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
