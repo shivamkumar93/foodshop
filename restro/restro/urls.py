@@ -49,5 +49,7 @@ urlpatterns = [
 
     # django views urls here
     path("categoryform/", category, name="categoryform"),
+    path("recipeform/", recipe, name="recipeform"),
+    path("recipetypeform/", recipetype, name="recipetypeform"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
