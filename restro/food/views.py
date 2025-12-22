@@ -173,11 +173,13 @@ class ForgotPasswordView(viewsets.ViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
    
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'title']
 
@@ -233,7 +235,7 @@ class OrderViewSet(viewsets.ViewSet):
                         'razorpay_order_id':razorpay_order['id'],
                         "razorpay_key": settings.RAZORPAY_KEY_ID,
                         'recipe':items },
-                          status=status.HTTP_201_CREATED)
+                        status=status.HTTP_201_CREATED)
 
 class VerifyPaymentApiview(APIView):
     
@@ -265,6 +267,7 @@ def verify(request):
 class AddressView(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Address.objects.filter(user=self.request.user)
