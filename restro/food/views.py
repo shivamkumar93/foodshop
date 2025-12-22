@@ -214,8 +214,8 @@ class OrderViewSet(viewsets.ViewSet):
         
         # orderitmes create--
         for item in items:
-            recipe = Recipe.objects.get(id=item['recipe_id'])
-            OrderItems.objects.create(order=order, recipe=recipe, quantity = item['quantity'])
+            recipevariant = Recipe.objects.get(id=item['recipevariant_id'])
+            OrderItems.objects.create(order=order, recipevariant=recipevariant, quantity = item['quantity'])
 
         total_amount = order.get_total_price()
 
@@ -274,3 +274,7 @@ class AddressView(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class RecipeVariantView(viewsets.ModelViewSet):
+    queryset = RecipeVariant.objects.all()
+    serializer_class = RecipeVariantSerializer

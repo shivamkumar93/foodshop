@@ -32,10 +32,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     class Meta:
         model = Recipe
-        fields = ['id','title','image','price','is_veg','category']
+        fields = ['id','title','image','category']
 
 class OrderItemSerializer(serializers.Serializer):
-    recipe_id = serializers.IntegerField()
+    recipevariant_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value = 1)
     
 class PaymentSerializer(serializers.ModelSerializer):
@@ -49,3 +49,9 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = "__all__"
         read_only_fields = ['user']
+
+class RecipeVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeVariant
+        fields = "__all__"
+        read_only_fields = ['recipe']

@@ -30,11 +30,31 @@ class Recipe(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     image = models.ImageField(upload_to='media/')
+   
+    def __str__(self):
+        return self.title
+class RecipeType(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True,blank=True)
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+    
+class RecipeVariant(models.Model):
+    SIZE_VARIANT = (
+        ('small','small'),
+        ('medium', 'medium'),
+        ('large', 'large')
+
+    )
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,related_name='variants', null=True, blank=True)
+    recipetype = models.ForeignKey(RecipeType, blank=True, on_delete=models.CASCADE)
+    size = models.CharField(max_length=10, choices=SIZE_VARIANT)
     price = models.IntegerField(default=0)
     is_veg = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.title
+        return self.size
 
 class Order(models.Model):
     ORDER_STATUS = (
@@ -61,7 +81,7 @@ class Order(models.Model):
 class OrderItems(models.Model):
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipevariant = models.ForeignKey(RecipeVariant, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
 
     def total_price(self):
