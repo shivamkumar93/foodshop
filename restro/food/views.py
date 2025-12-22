@@ -179,7 +179,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category', 'title']
 
@@ -214,7 +214,7 @@ class OrderViewSet(viewsets.ViewSet):
         
         # orderitmes create--
         for item in items:
-            recipevariant = Recipe.objects.get(id=item['recipevariant_id'])
+            recipevariant = RecipeVariant.objects.get(id=item['recipevariant_id'])
             OrderItems.objects.create(order=order, recipevariant=recipevariant, quantity = item['quantity'])
 
         total_amount = order.get_total_price()
@@ -278,3 +278,8 @@ class AddressView(viewsets.ModelViewSet):
 class RecipeVariantView(viewsets.ModelViewSet):
     queryset = RecipeVariant.objects.all()
     serializer_class = RecipeVariantSerializer
+
+class RecipeTypeView(viewsets.ModelViewSet):
+    queryset = RecipeType.objects.all()
+    serializer_class = RecipeTypeSerializer
+    

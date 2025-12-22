@@ -29,7 +29,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class RecipeSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    
     class Meta:
         model = Recipe
         fields = ['id','title','image','category']
@@ -54,4 +54,9 @@ class RecipeVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeVariant
         fields = "__all__"
-        read_only_fields = ['recipe']
+       
+
+class RecipeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeType
+        fields = "__all__"

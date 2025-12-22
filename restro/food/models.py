@@ -33,6 +33,7 @@ class Recipe(models.Model):
    
     def __str__(self):
         return self.title
+    
 class RecipeType(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True,blank=True)
     name = models.CharField(max_length=50)
@@ -85,10 +86,10 @@ class OrderItems(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def total_price(self):
-        return self.recipe.price * self.quantity
+        return self.recipevariant.price * self.quantity
     
     def __str__(self):
-        return f"{self.recipe.price} x {self.quantity} -- {self.recipe.title}"
+        return f"{self.quantity} -- {self.recipevariant}"
     
 class Payment(models.Model):
     STATUS_CHOISE = (
