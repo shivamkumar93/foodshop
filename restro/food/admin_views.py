@@ -2,6 +2,15 @@ from django.shortcuts import render, redirect
 from .forms import *
 from .models import *
 
+
+def home(request):
+    data = {}
+    data['recipes'] = Recipe.objects.all()
+    data['categories'] = Category.objects.all()
+    data['variants'] = RecipeVariant.objects.all()
+    data['recipetypes'] = RecipeType.objects.all()
+    return render(request, 'recipe/home.html', data)
+
 def category(request):
     if request.method == "POST":
         form = CategoryForm(request.POST or None, request.FILES)

@@ -48,6 +48,7 @@ urlpatterns = [
     path('payment/', verify),
 
     # django views urls here
+    path('home/', home, name='home'),
     path("categoryform/", category, name="categoryform"),
     path("recipeform/", recipe, name="recipeform"),
     path("recipetypeform/", recipetype, name="recipetypeform"),

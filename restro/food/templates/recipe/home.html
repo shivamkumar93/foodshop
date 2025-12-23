@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <!-- <h1>This hi home page and show all category and recipe </h1> -->
+    <div class=" flex flex-1 px-2 h-screen items-stretch gap-3">
+        <div class="w-1/12">
+            <a href="">
+                <div class="grid grid-1 px-1 py-2 gap-3">
+
+                    {% for category in categories %}
+                    <div class="flex flex-col border border-2 ">
+                        <img src="{{category.image.url}}" alt="" class="w-full h-20 object-cover">
+                        <p>{{category.name}}</p>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </a>
+        </div>
+        <div class="w-8/12 border border-2">
+
+            <div class="grid grid-cols-6 p-2">
+                
+                {% for variant in variants %}
+                <a href="">
+                    <div class="flex flex-col border p-2">
+                        <img src="{{variant.recipe.image.url}}" alt="">
+                        <h3>{{variant.recipe.title}} -- ({{variant.recipetype.name}})</h3>
+                        <h3></h3>
+                        <p>size :{{variant.size}}</p>
+                        <p>price: {{variant.price}}\-</p>
+                        <p>Is_veg :{{variant.is_veg}}</p>
+                    </div>
+                </a>
+                    {% endfor %}
+                </div>
+
+        </div>
+        <div class="w-3/12 bg-green-500 flex p-4">
+            <div class="flex flex-col w-full gap-2 ">
+                <div class="flex flex-col border p-2 gap-1">
+
+                    <div class="flex justify-between">
+                        <p class="font-semibold">Recipe name</p>
+                        <p class="font-semibold">Price</p>
+                    </div>
+
+
+                    <div class="flex justify-between text-sm">
+                        <p>Unit price</p>
+                        <p>Qty</p>
+                    </div>
+
+
+                    <div class="flex gap-4 items-center justify-between">
+                        <p>
+                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">+</a>
+                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">−</a>
+                        </p>
+                        <a href="#" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                            Delete
+                        </a>
+                    </div>
+
+
+                </div>
+                <div class="flex flex-col border p-2 gap-1">
+
+                    <div class="flex justify-between">
+                        <p class="font-semibold">Recipe name</p>
+                        <p class="font-semibold">Price</p>
+                    </div>
+
+
+                    <div class="flex justify-between text-sm">
+                        <p>Unit price</p>
+                        <p>Qty</p>
+                    </div>
+
+
+                    <div class="flex gap-4 items-center justify-between">
+                        <p>
+                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">+</a>
+                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">−</a>
+                        </p>
+                        <a href="#" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                            Delete
+                        </a>
+                    </div>
+
+
+                </div>
+                
+            </div>
+
+
+        </div>
+</body>
+
+</html>
