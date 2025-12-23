@@ -32,3 +32,12 @@ def recipetype(request):
         form = RecipeTypeForm()
     return render(request, 'recipe/recipetype.html', {'form':form})
 
+def recipevariant(requset):
+    if requset.method == 'POST':
+        form = RecipeVariantForm(requset.POST or None)
+        if form.is_valid():
+            form.save()
+            return redirect(recipevariant)
+    else:
+        form = RecipeVariantForm()
+    return render(requset, 'recipe/recipevariantform.html', {'form':form})

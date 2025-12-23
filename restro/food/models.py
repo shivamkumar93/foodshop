@@ -56,7 +56,8 @@ class RecipeVariant(models.Model):
 
     def __str__(self):
         return self.size
-
+    
+    
 class Order(models.Model):
     ORDER_STATUS = (
         ('pending','pending'),

@@ -17,3 +17,5 @@ class RecipeVariantForm(forms.ModelForm):
     class Meta:
         model = RecipeVariant
         fields = "__all__"
+    
+    

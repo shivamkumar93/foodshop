@@ -51,5 +51,6 @@ urlpatterns = [
     path("categoryform/", category, name="categoryform"),
     path("recipeform/", recipe, name="recipeform"),
     path("recipetypeform/", recipetype, name="recipetypeform"),
+    path("recipevariantform/", recipevariant, name="recipevariantform"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
