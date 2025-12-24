@@ -49,9 +49,14 @@ urlpatterns = [
 
     # django views urls here
     path('home/', home, name='home'),
+    path('registeruser/', registerUser, name='registeruser'),
+    path('loginuser/', loginUser, name='loginuser'),
+    path('logutuser', logoutuser, name="logoutuser"),
     path("categoryform/", category, name="categoryform"),
     path("recipeform/", recipe, name="recipeform"),
     path("recipetypeform/", recipetype, name="recipetypeform"),
     path("recipevariantform/", recipevariant, name="recipevariantform"),
+    path("order_create/<int:variant_id>/", create_order, name="ordercreate"),
+    path("delete_order/<int:order_id>/", deleteOrder, name="deleteorder"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

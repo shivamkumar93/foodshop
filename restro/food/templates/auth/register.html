@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="flex flex-1">
+        <div class="flex flex-col px-[30%] items-center justify-center ">
+            <form action="" method="post" class="items-center justify-center mt-4 border p-5">
+                <h1 class="text-center items-center text-xl font-semibold">Register Here</h1>
+                {% csrf_token %}
+                <label for="">email</label>
+                <input type="email" name="email" id="email" class="py-2 w-full border">
+                <label for="">Password</label>
+                <input type="text" name="password" id="password" class="py-2 w-full border">
+                <label for="">Conform Password</label>
+                <input type="text" name="conform_password" id="conform_password" class="py-2 w-full border">
+                <button type="submit" class="text-white py-1 items-center bg-blue-500 border mt-2 w-full">sumbit</button>
+                
+            </form>
+            <a href="{% url 'loginuser' %}">Login Here</a>
+        </div>
+    </div>
+    
+</body>
+</html>

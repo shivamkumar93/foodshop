@@ -78,7 +78,7 @@ class Order(models.Model):
         return total
     
     def __str__(self):
-        return f"{self.user.first_name}"
+        return f"{self.user}"
     
 class OrderItems(models.Model):
 
