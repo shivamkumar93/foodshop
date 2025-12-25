@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="flex flex-1">
+        <h2>Complete Payment</h2>
+
+<form id="razorpay-form" method="POST" action="{% url 'payment_verify' %}">
+    {% csrf_token %}
+    <script src="https://checkout.razorpay.com/v1/checkout.js"
+        data-key="{{ razorpay_key_id }}"
+        data-amount="{{ amount }}"
+        data-currency="INR"
+        data-order_id="{{ razorpay_order_id }}"
+        data-buttontext="Pay Now"
+        data-name="My Shop"
+        data-description="Order #{{ order.id }}"
+        data-prefill.name="{{ order.user.username }}"
+        data-prefill.email="{{ order.user.email }}"
+        data-theme.color="#3399cc">
+    </script>
+</form>
+
+    </div>
+</body>
+</html>

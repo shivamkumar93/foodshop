@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Address & Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-10">
+
+    <div class="mt-6 flex justify-end">
+        <a href="{% url 'address' %}"
+            class="inline-block bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded transition">
+            Create New Address
+        </a>
+    </div>
+    <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Select Address</h2>
+
+        {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'order-payment' order.id %}" class="space-y-4">
+            {% csrf_token %}
+
+            {% for address in addresses %}
+            <div class="flex items-center border p-4 rounded hover:bg-gray-50">
+                <input type="radio" name="address" value="{{ address.id }}" required class="mr-4">
+                <div class="text-gray-700">
+                    <p class="font-medium">{{ address.name }}</p>
+                    <p>{{ address.street }}, {{ address.city }}</p>
+                    <p>{{ address.phone }} - {{ address.pincode }}</p>
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition">
+                Pay
+            </button>
+        </form>
+        {% endif %}
+
+
+    </div>
+
+</body>
+
+</html>

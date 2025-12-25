@@ -8,6 +8,9 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 User = get_user_model()
 from django.http import HttpResponse
+import razorpay
+from django.conf import settings
+
 
 @login_required
 def home(request):
@@ -22,15 +25,16 @@ def home(request):
 
 
 @login_required
-def order_address(request):
-    addresses = Address.objects.filter(user = request.user)
+def address(request):
+   
+    addresses = Address.objects.filter(user=request.user)
     if request.method == 'POST':
         form = AddressForm(request.POST or None)
         if form.is_valid():
             form = form.save(commit=False)
             form.user = request.user
             form.save()
-            return redirect(order_address)
+            return redirect('address')
     else:
         form = AddressForm()
     return render(request, 'recipe/address.html',{'form':form, 'addresses':addresses})
@@ -113,11 +117,11 @@ def recipevariant(requset):
 def create_order(request, variant_id):
     recipe_variant = get_object_or_404(RecipeVariant, id=variant_id)
 
-    order, create = Order.objects.get_or_create(user=request.user, status = 'pending')
+    order, order_create = Order.objects.get_or_create(user=request.user, status = 'pending')
 
-    item, create = OrderItems.objects.get_or_create(order=order, recipevariant = recipe_variant)
+    item, item_create = OrderItems.objects.get_or_create(order=order, recipevariant = recipe_variant)
 
-    if not create:
+    if not item_create:
         item.quantity += 1
         item.save()
     return redirect(home)
@@ -127,5 +131,56 @@ def deleteOrder(request, order_id):
     item.delete()
     return redirect(home)
 
+def payment(request, order_id):
+    addresses = Address.objects.filter(user=request.user)
+    order = get_object_or_404(Order, id=order_id, user = request.user)
+    
+    if request.method == 'POST':
+        address_id = request.POST.get('address')
+        address = get_object_or_404(Address, id=address_id, user=request.user)
 
+        order.address = address
+        order.save()
 
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        amount = order.get_total_price() * 100
+        razorpay_order = client.order.create({"amount":amount,"currency": "INR", "payment_capture":1})
+
+        Payment.objects.create(order=order, razorpay_order_id=razorpay_order['id'], status='create')
+
+        return render(request, 'recipe/payment_checkout.html', {
+            'order': order,
+            'amount': amount,
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'razorpay_order_id': razorpay_order['id'],
+        })
+    
+    return render(request, 'recipe/payment.html', {'addresses':addresses, 'order':order})
+
+def payment_verify(request):
+    if request.method == 'POST':
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
+
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        try:
+            client.utility.verify_payment_signature({
+                'razorpay_order_id':razorpay_order_id,
+                'razorpay_payment_id':razorpay_payment_id,
+                'razorpay_signature':razorpay_signature
+            })
+        except:
+            return HttpResponse('payment falied')
+        
+        payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
+        payment.razorpay_payment_id=razorpay_payment_id
+        payment.razorpay_signature = razorpay_signature
+        payment.status = 'success'
+        payment.save()
+
+        order = payment.order
+        order.status = 'paid'
+        order.save()
+
+        return HttpResponse("payment success")

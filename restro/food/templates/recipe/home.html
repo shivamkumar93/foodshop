@@ -52,7 +52,7 @@
                 </a>
                 {% endfor %}
             </div>
-            
+
             <!-- <div class="grid grid-cols-5 gap-2">
             {% for recipe in recipes %}
                 <div class="flex flex-col">
@@ -65,7 +65,7 @@
                 
                 {% endfor %}
             </div> -->
-                
+
         </div>
         <div class="w-3/12 p-4 border-2 border-gray-300">
             <div class="flex flex-col w-full gap-4">
@@ -94,10 +94,14 @@
 
                 {% endfor %}
 
-                <a href="{% url 'order_address' %}"
-                    class="mt-4 text-center bg-green-600 text-white py-2 rounded hover:bg-green-700">
-                    Pay
-                </a>
+                <div class="flex flex-1 justify-center items-center ">
+
+                    {% for order in orders %}
+                    <a href="{% url 'order-payment' order.id %}" class="bg-blue-600 w-full py-2 text-white text-center rounded">Select
+                        Address & Pay</a>
+                    {% endfor %}
+                </div>
+
 
             </div>
         </div>

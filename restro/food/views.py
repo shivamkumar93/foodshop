@@ -18,7 +18,7 @@ from google.auth.transport import requests
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 import razorpay
-from django.conf import settings
+
 from rest_framework.permissions import IsAuthenticated
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))

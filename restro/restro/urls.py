@@ -58,6 +58,8 @@ urlpatterns = [
     path("recipevariantform/", recipevariant, name="recipevariantform"),
     path("order_create/<int:variant_id>/", create_order, name="ordercreate"),
     path("delete_order/<int:order_id>/", deleteOrder, name="deleteorder"),
-    path("order-address/", order_address, name="order_address"),
+    path("order-address/", address, name="address"),
+    path("orderpayment/<int:order_id>/", payment, name="order-payment"),
+    path('payment-verify/', payment_verify, name='payment_verify'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
