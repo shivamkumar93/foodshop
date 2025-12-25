@@ -32,7 +32,7 @@ router.register(r"forgotPassword", ForgotPasswordView, basename='forgot')
 router.register(r"authlogin",LoginAPIView, basename='login')
 router.register(r"order", OrderViewSet, basename='order')
 router.register(r"address", AddressView, basename='address')
-router.register(r"recipevarint", RecipeVariantView, basename='recipevarint')
+router.register(r"recipevariant", RecipeVariantView, basename='recipevarint')
 router.register(r"recipetype", RecipeTypeView, basename='recipetype')
 
 
@@ -58,5 +58,6 @@ urlpatterns = [
     path("recipevariantform/", recipevariant, name="recipevariantform"),
     path("order_create/<int:variant_id>/", create_order, name="ordercreate"),
     path("delete_order/<int:order_id>/", deleteOrder, name="deleteorder"),
+    path("order-address/", order_address, name="order_address"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -18,4 +18,9 @@ class RecipeVariantForm(forms.ModelForm):
         model = RecipeVariant
         fields = "__all__"
     
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['name', 'street','phone','city', 'pincode']
+        
     

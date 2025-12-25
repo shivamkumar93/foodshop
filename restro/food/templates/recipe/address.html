@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="flex flex-1 px-[2%]">
+        <div class="w-7/12 border border-1 p-5 mt-5">
+            {% load tailwind_filters %}
+
+            {% if user.is_authenticated %}
+            <form method="POST" class="flex flex-1">
+                {% csrf_token %}
+
+                {% for address in addresses %}
+                <div class="border p-3 mb-3 flex gap-3 items-start items-center">
+                    <input type="checkbox" name="address" value="{{ address.id }}" class="mt-1">
+
+                    <div class=" flex flex-1">
+                        <p class="font-semibold">{{ address.name }}</p>
+                        <p>{{ address.phone }}</p>
+                        <p>{{ address.street }}, {{ address.city }} - {{ address.pincode }}</p>
+                    </div>
+                </div>
+                
+                <button type="submit" class="bg-green-600 text-white rounded">
+                    Continue
+                </button>
+                {% endfor %}
+            </form>
+
+            {% endif %}
+            <form action="" method="post">
+                {% csrf_token %}
+                {{form|crispy}}
+                <button type="submit">Sumbit</button>
+            </form>
+        </div>
+        <div class="w-5/12"></div>
+
+    </div>
+
+
+</body>
+
+</html>

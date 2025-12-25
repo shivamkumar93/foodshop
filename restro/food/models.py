@@ -82,7 +82,7 @@ class Order(models.Model):
     
 class OrderItems(models.Model):
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     recipevariant = models.ForeignKey(RecipeVariant, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
 

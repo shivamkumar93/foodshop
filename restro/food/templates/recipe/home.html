@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    
+
     <div class="flex flex-1 justify-between px-[5%] py-2 bg-gray-500 text-white">
         {% if user.is_authenticated %}
         <h1>Welcome {{user.email}} </h1>
@@ -18,7 +18,7 @@
             <h2>logout</h2>
         </a>
     </div>
-        
+
     <div class=" flex flex-1 px-2 h-screen items-stretch gap-3">
         <div class="w-1/12 border border-2">
             <div class="grid grid-1 px-1 py-2 gap-3">
@@ -37,12 +37,12 @@
         </div>
         <div class="w-8/12 border border-2">
 
-            <div class="grid grid-cols-6 p-2">
+            <div class="grid grid-cols-4 gap-2 p-2">
 
                 {% for variant in variants %}
                 <a href="{% url 'ordercreate' variant.id %}">
                     <div class="flex flex-col border p-2">
-                        <img src="{{variant.recipe.image.url}}" alt="">
+                        <img src="{{variant.recipe.image.url}}" alt="" class="w-full h-40">
                         <h3>{{variant.recipe.title}} -- ({{variant.recipetype.name}})</h3>
                         <h3></h3>
                         <p>size :{{variant.size}}</p>
@@ -52,39 +52,56 @@
                 </a>
                 {% endfor %}
             </div>
+            
+            <!-- <div class="grid grid-cols-5 gap-2">
+            {% for recipe in recipes %}
+                <div class="flex flex-col">
 
-        </div>
-        <div class="w-3/12 flex p-4 border border-2">
-            <div class="flex flex-col w-full gap-2">
+                    <img src="{{recipe.image.url}}" alt="" class="w-full h-20 object-cover">
+                    <p>{{recipe.variants.size}}</p>
+                    <p>{{recipe.title}}</p>
+                    <p>{{recipe.recipetype.name}}</p>
+                </div>
                 
+                {% endfor %}
+            </div> -->
+                
+        </div>
+        <div class="w-3/12 p-4 border-2 border-gray-300">
+            <div class="flex flex-col w-full gap-4">
+
                 {% for order in orders %}
-                <div class="flex flex-col border p-2 gap-1">
-                    <div class="flex justify-between">
-                        <p class="font-semibold">Recipe name: {{order.variant.recipe.title}}</p>
-                        <p class="font-semibold">Price {{order.get_total_price}}</p>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <p>Unit price {{order.recipevariant.price}}</p>
-                        <p>{{order.recipevariant.quantity}}</p>
-                    </div>
-                    <div class="flex gap-4 items-center justify-between">
+                {% for item in order.items.all %}
+
+                <div class="border rounded-lg p-3 flex flex-col gap-2">
+                    <div class="flex justify-between font-medium">
                         <p>
-                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">+</a>
-                            <a href="#" class="px-2 py-1 bg-white rounded text-black hover:bg-gray-200">-</a>
+                            {{ item.recipevariant.recipe.title }}
+                            ({{ item.recipevariant.recipetype.name }})
                         </p>
-                        <a href="{% url 'deleteorder' order.id %}" class="px-2 py-1 font-semibold text-red-600 rounded">
-                            Delete
-                        </a>
+                        <p>Total: {{ item.total_price }}</p>
                     </div>
-                    
+
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <p>Qty: {{ item.quantity }}</p>
+                        <p>Unit Price: {{ item.recipevariant.price }}</p>
+                    </div>
                 </div>
                 {% endfor %}
-          
+                <div class="flex flex-1">
+                    <p>Payable Amount : {{order.get_total_price}}</p>
+                </div>
+
+                {% endfor %}
+
+                <a href="{% url 'order_address' %}"
+                    class="mt-4 text-center bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                    Pay
+                </a>
 
             </div>
-
-
         </div>
+
 </body>
 
 </html>

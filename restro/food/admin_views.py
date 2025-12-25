@@ -5,18 +5,35 @@ from django.contrib.auth import get_user_model, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
 User = get_user_model()
 from django.http import HttpResponse
 
+@login_required
 def home(request):
     data = {}
     data['recipes'] = Recipe.objects.all()
     data['categories'] = Category.objects.all()
     data['variants'] = RecipeVariant.objects.all()
     data['recipetypes'] = RecipeType.objects.all()
-    data['orders'] = Order.objects.filter(user=request.user)
+    data['orders'] = Order.objects.filter(user=request.user).prefetch_related('items__recipevariant__recipe')
     data['orderitems'] = OrderItems.objects.all()
     return render(request, 'recipe/home.html', data)
+
+
+@login_required
+def order_address(request):
+    addresses = Address.objects.filter(user = request.user)
+    if request.method == 'POST':
+        form = AddressForm(request.POST or None)
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.user = request.user
+            form.save()
+            return redirect(order_address)
+    else:
+        form = AddressForm()
+    return render(request, 'recipe/address.html',{'form':form, 'addresses':addresses})
 
 def registerUser(request):
     if request.method == 'POST':
@@ -26,7 +43,6 @@ def registerUser(request):
 
         if not email or not password or not conform_password:
             messages.error(request, "all fields are required")
-
 
         user = User.objects.create_user(email=email, password=password)
         user.save()
@@ -110,4 +126,6 @@ def deleteOrder(request, order_id):
     item = get_object_or_404(Order, id=order_id)
     item.delete()
     return redirect(home)
+
+
 
