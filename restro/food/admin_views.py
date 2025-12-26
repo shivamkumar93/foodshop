@@ -131,6 +131,24 @@ def deleteOrder(request, order_id):
     item.delete()
     return redirect(home)
 
+@login_required
+def increaseitme(request, item_id):
+    additem = get_object_or_404(OrderItems, id=item_id, order__user= request.user)
+    
+    additem.quantity += 1
+    additem.save()
+    return redirect(home)
+
+# @login_required
+# def decrease_item(request, id):
+#     item = get_object_or_404(OrderItems, id=id)
+#     if item.quantity > 1:
+#         item.quantity -= 1
+#         item.save()
+#     else:
+#         item.delete()
+#     return redirect(home)
+
 def payment(request, order_id):
     addresses = Address.objects.filter(user=request.user)
     order = get_object_or_404(Order, id=order_id, user = request.user)
@@ -184,3 +202,4 @@ def payment_verify(request):
         order.save()
 
         return HttpResponse("payment success")
+    

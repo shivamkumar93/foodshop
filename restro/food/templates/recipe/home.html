@@ -86,6 +86,9 @@
                         <p>Qty: {{ item.quantity }}</p>
                         <p>Unit Price: {{ item.recipevariant.price }}</p>
                     </div>
+                    <div>
+                        <a href="{% url 'additem' item.id %}">+</a>
+                    </div>
                 </div>
                 {% endfor %}
                 <div class="flex flex-1">
