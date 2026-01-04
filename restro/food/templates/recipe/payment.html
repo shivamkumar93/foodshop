@@ -3,46 +3,150 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Address & Payment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col items-center py-10">
 
-    <div class="mt-6 flex justify-end">
-        <a href="{% url 'address' %}"
-            class="inline-block bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded transition">
-            Create New Address
-        </a>
-    </div>
     <div class="w-full max-w-2xl bg-white shadow-md rounded-lg p-6">
+
         <h2 class="text-2xl font-semibold mb-6 text-center">Select Address</h2>
 
-        {% if user.is_authenticated %}
-        <form method="POST" action="{% url 'order-payment' order.id %}" class="space-y-4">
+        <a href="{% url 'address' %}" class="text-blue-600 underline mb-4 inline-block">
+            + Add New Address
+        </a>
+
+        <form id="payment-form" method="post">
             {% csrf_token %}
 
+            <!-- Hidden input to store selected address -->
+            <input type="hidden" name="address_id" id="address_id">
+
             {% for address in addresses %}
-            <div class="flex items-center border p-4 rounded hover:bg-gray-50">
-                <input type="radio" name="address" value="{{ address.id }}" required class="mr-4">
-                <div class="text-gray-700">
-                    <p class="font-medium">{{ address.name }}</p>
+            <label class="flex items-center border p-4 rounded mb-2 cursor-pointer">
+                <input type="radio" name="address_radio" value="{{ address.id }}" class="mr-3"
+                    onchange="setAddress(this.value)">
+                <div>
+                    <p class="font-medium">{{ address.name }}{{address.id}}</p>
                     <p>{{ address.street }}, {{ address.city }}</p>
-                    <p>{{ address.phone }} - {{ address.pincode }}</p>
+                    <p>{{ address.phone }}</p>
                 </div>
-            </div>
+            </label>
             {% endfor %}
 
-            <button type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition">
-                Pay
+            <button type="button" id="pay-btn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded mt-4">
+                Pay Now
             </button>
         </form>
-        {% endif %}
-
 
     </div>
+
+    <script>
+        function setAddress(addressId) {
+            document.getElementById("address_id").value = addressId;
+        }
+
+        // helper to read CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.getElementById("pay-btn").onclick = function () {
+
+            const addressId = document.getElementById("address_id").value;
+
+            if (!addressId) {
+                alert("Please select an address");
+                return;
+            }
+
+            const csrftoken = getCookie('csrftoken');
+
+            fetch("{% url 'order-payment' order.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: JSON.stringify({
+                    address_id: addressId
+                })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Network response was not ok');
+                    return res.json();
+                })
+                .then(data => {
+                    // data: { order, amount (paise), razorpay_key_id, razorpay_order_id, name }
+                    const options = {
+                        key: data.razorpay_key_id || "rzp_test_RJKzOMnn4i4LG0",
+                        amount: data.amount, // already in paise from server
+                        currency: "INR",
+                        name: data.name || "My Shop",
+                        description: "Order #" + data.order,
+                        order_id: data.razorpay_order_id,
+                        handler: function (response) {
+                            fetch("{% url 'payment_verify' %}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": csrftoken
+                                },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    address_id: addressId
+                                })
+                            })
+                                .then(res => res.json())
+                                .then(resData => {
+                                    // backend returns JSON with status and optional redirect_url
+                                    if (resData && (resData.status === 'success' || resData.message)) {
+                                        // Use redirect_url from server if provided, else named URL
+                                        const redirectUrl = resData.redirect_url || "{% url 'order_success' %}";
+                                        window.location.href = redirectUrl;
+                                    } else if (resData && resData.error) {
+                                        alert('Payment verification failed: ' + resData.error);
+                                    } else {
+                                        // admin payment_verify returns plain HttpResponse; fall back to named URL
+                                        window.location.href = "{% url 'order_success' %}";
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('verify error', err);
+                                    window.location.reload();
+                                });
+                        }
+                    };
+
+                    var rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response) {
+                        alert('Payment failed: ' + (response.error && response.error.reason ? response.error.reason : 'Unknown'));
+                    });
+                    rzp.open();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Could not initiate payment — check console for details.');
+                });
+        };
+    </script>
 
 </body>
 

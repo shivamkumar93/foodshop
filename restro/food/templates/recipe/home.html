@@ -92,6 +92,7 @@
                 </div>
                 {% endfor %}
                 <div class="flex flex-1">
+                    <a href="{% url 'deleteorder' order.id %}">delete</a>
                     <p>Payable Amount : {{order.get_total_price}}</p>
                 </div>
 

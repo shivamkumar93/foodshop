@@ -61,6 +61,7 @@ urlpatterns = [
     path("order-address/", address, name="address"),
     path("orderpayment/<int:order_id>/", payment, name="order-payment"),
     path('payment-verify/', payment_verify, name='payment_verify'),
+    path('order-success/', order_success, name='order_success'),
     path('additem/<int:item_id>/', increaseitme, name='additem'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

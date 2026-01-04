@@ -7,9 +7,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 User = get_user_model()
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import razorpay
 from django.conf import settings
+import json
 
 
 @login_required
@@ -19,7 +20,7 @@ def home(request):
     data['categories'] = Category.objects.all()
     data['variants'] = RecipeVariant.objects.all()
     data['recipetypes'] = RecipeType.objects.all()
-    data['orders'] = Order.objects.filter(user=request.user).prefetch_related('items__recipevariant__recipe')
+    data['orders'] = Order.objects.filter(user=request.user, status = 'pending').prefetch_related('items__recipevariant__recipe')
     data['orderitems'] = OrderItems.objects.all()
     return render(request, 'recipe/home.html', data)
 
@@ -150,36 +151,74 @@ def increaseitme(request, item_id):
 #     return redirect(home)
 
 def payment(request, order_id):
-    addresses = Address.objects.filter(user=request.user)
-    order = get_object_or_404(Order, id=order_id, user = request.user)
-    
+    try:
+        addresses = Address.objects.filter(user=request.user)
+    except:
+        return HttpResponse(request,"Hi here we are")
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
     if request.method == 'POST':
-        address_id = request.POST.get('address')
-        address = get_object_or_404(Address, id=address_id, user=request.user)
+
+        data = json.loads(request.body)   
+        address_id = data.get("address_id")
+        
+        if address_id:
+            address = get_object_or_404(Address, id=address_id, user=request.user)
 
         order.address = address
         order.save()
 
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        amount = order.get_total_price() * 100
-        razorpay_order = client.order.create({"amount":amount,"currency": "INR", "payment_capture":1})
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+        )
 
-        Payment.objects.create(order=order, razorpay_order_id=razorpay_order['id'], status='create')
+        amount = int(order.get_total_price() * 100)
 
-        return render(request, 'recipe/payment_checkout.html', {
+        razorpay_order = client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "payment_capture": 1
+        })
+
+        payment = Payment.objects.create(order=order, razorpay_order_id= razorpay_order['id'], status = 'pending')
+
+
+        # If request content is JSON (AJAX/fetch) return JSON so front-end can open Razorpay popup
+        if request.content_type == 'application/json' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'order': order.id,
+                'amount': amount,  # amount is in paise already
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                'razorpay_order_id': razorpay_order['id'],
+                'name': order.user.first_name,
+            })
+
+        return render(request, 'recipe/payment.html', {
             'order': order,
+            'addresses': addresses,
             'amount': amount,
             'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             'razorpay_order_id': razorpay_order['id'],
         })
-    
-    return render(request, 'recipe/payment.html', {'addresses':addresses, 'order':order})
+
+    return render(request, 'recipe/payment.html', {
+        'addresses': addresses,
+        'order': order
+    })
+
 
 def payment_verify(request):
     if request.method == 'POST':
-        razorpay_payment_id = request.POST.get('razorpay_payment_id')
-        razorpay_order_id = request.POST.get('razorpay_order_id')
-        razorpay_signature = request.POST.get('razorpay_signature')
+        # support both form POST and JSON POST
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            razorpay_payment_id = data.get('razorpay_payment_id')
+            razorpay_order_id = data.get('razorpay_order_id')
+            razorpay_signature = data.get('razorpay_signature')
+        else:
+            razorpay_payment_id = request.POST.get('razorpay_payment_id')
+            razorpay_order_id = request.POST.get('razorpay_order_id')
+            razorpay_signature = request.POST.get('razorpay_signature')
 
         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
         try:
@@ -188,8 +227,10 @@ def payment_verify(request):
                 'razorpay_payment_id':razorpay_payment_id,
                 'razorpay_signature':razorpay_signature
             })
-        except:
-            return HttpResponse('payment falied')
+        except Exception as e:
+            if request.content_type == 'application/json':
+                return JsonResponse({'error':'payment failed', 'details': str(e)}, status=400)
+            return HttpResponse('payment failed')
         
         payment = Payment.objects.get(razorpay_order_id=razorpay_order_id)
         payment.razorpay_payment_id=razorpay_payment_id
@@ -200,6 +241,11 @@ def payment_verify(request):
         order = payment.order
         order.status = 'paid'
         order.save()
+        return redirect('order_success')
 
-        return HttpResponse("payment success")
+
+@login_required
+def order_success(request):
+    # Simple success page after payment
+    return render(request, 'recipe/order_success.html')
     
